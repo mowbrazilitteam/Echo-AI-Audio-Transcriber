@@ -13,6 +13,8 @@ dependencies = [
     "faster-whisper>=1.2.1",
     "httpx>=0.28.1",
     "jinja2>=3.1.6",
+    # no macOS, a última com roda para Intel e para o macOS 13 (a 1.24+ pede macOS 14 no Apple Silicon e não tem Intel)
+    "onnxruntime==1.23.2 ; sys_platform == 'darwin'",
     "psutil>=6",
     "pydantic-settings>=2.15.0",
     "python-multipart>=0.0.32",
@@ -106,7 +108,8 @@ requires = [
 permission.microphone = "Echo-AI records audio from the microphone to transcribe it on this computer."
 
 [tool.briefcase.app.echo-ai.macOS]
-requires = ["pywebview>=5.3"]
+requires = ["pywebview>=5.3", "onnxruntime==1.23.2"]  # a mesma trava do [project]: roda para Intel e para o macOS 13
+min_os_version = "13.0"  # o PyAV e o onnxruntime só têm roda a partir do macOS 13
 universal_build = false
 
 [tool.briefcase.app.echo-ai.windows]
