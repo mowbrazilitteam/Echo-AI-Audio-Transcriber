@@ -26,7 +26,7 @@ jobs:
           - { sistema: linux, runner: ubuntu-24.04, alvo: "linux system", arquivo: "dist/*.deb" }   # o Python do sistema é o 3.12
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - uses: astral-sh/setup-uv@v6
@@ -67,7 +67,7 @@ jobs:
     permissions:
       contents: write   # só aqui: criar a Release e anexar os instaladores
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - uses: actions/download-artifact@v8
