@@ -8,7 +8,7 @@ license-files = ["LICENSE"]
 authors = [{ name = "Victor Medeiros" }]
 requires-python = ">=3.12"
 dependencies = [
-    "av>=14,<16",
+    "av>=14,<19",
     "fastapi>=0.142.0",
     "faster-whisper>=1.2.1",
     "httpx>=0.28.1",
@@ -94,7 +94,7 @@ icon = "icones/echo-ai"
 sources = ["echo_ai"]
 test_sources = ["tests"]
 requires = [
-    "av>=14,<16",
+    "av>=14,<19",
     "fastapi>=0.142.0",
     "faster-whisper>=1.2.1",
     "httpx>=0.28.1",
