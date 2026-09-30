@@ -1,0 +1,32 @@
+# segredo e configuração local
+.env
+.env.*
+!.env.example
+# ambiente e caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+# dado do usuário: áudios, transcrições, banco e vozes geradas ficam FORA do git (o app guarda na pasta do sistema)
+dados/
+*.db
+*.db-*
+*.wav
+*.mp3
+*.m4a
+*.ogg
+*.opus
+*.webm
+*.flac
+*.mp4
+*.srt
+
+# o modelo que o instalador inclui (scripts/incluir_modelo.py); baixado na hora de empacotar
+echo_ai/modelos/
+# o que o briefcase gera
+build/
+dist/
+logs/
+.briefcase/
