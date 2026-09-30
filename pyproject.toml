@@ -110,6 +110,7 @@ requires = ["pywebview>=5.3"]
 universal_build = false
 
 [tool.briefcase.app.echo-ai.windows]
+system_installer = false  # instala só para o usuário: o MSI não pede senha de administrador
 requires = ["pywebview>=5.3"]
 
 [tool.briefcase.app.echo-ai.linux]

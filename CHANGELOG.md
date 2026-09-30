@@ -11,3 +11,4 @@ The first public release of Echo-AI (Echo AI Audio Transcriber).
 - Automatic GPU or CPU; optional NVIDIA acceleration package and AI engine installed by the app.
 - Interface in English, Portuguese and Spanish; dark and light themes.
 - Installers for Windows (MSI), macOS (DMG) and Ubuntu (DEB), with the Whisper Small model included.
+- No administrator rights needed on Windows and macOS, or install from the terminal on any system with `uv`.

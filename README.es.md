@@ -35,13 +35,43 @@ El modelo **Small** de Whisper viene incluido, así que la primera transcripció
 
 | Sistema | Archivo | Primera apertura |
 |---|---|---|
-| Windows 10 / 11 (64 bits) | `echo-ai-*-windows.msi` | El instalador aún no tiene firma digital: en el aviso de SmartScreen, haz clic en **Más información → Ejecutar de todas formas**. |
-| macOS 13+ | `echo-ai-*-mac-arm.dmg` para Apple Silicon (M1 o posterior), `echo-ai-*-mac-intel.dmg` para Intel | Arrastra Echo-AI a Aplicaciones. La app aún no está notarizada: la primera vez, haz clic derecho y elige **Abrir**, o permítela en **Ajustes del Sistema → Privacidad y seguridad**. |
-| Ubuntu 24.04+ y derivados | `echo-ai-*-linux.deb` | `sudo apt install ./echo-ai-*-linux.deb` |
-| Cualquier otro Linux | — | Consulta [Ejecutar desde el código](#ejecutar-desde-el-código): un comando con `uv`. |
+| Windows 10 / 11 (64 bits) | `echo-ai-*-windows.msi` | Se instala solo para tu usuario, sin contraseña de administrador. El instalador aún no tiene firma digital: en el aviso de SmartScreen, haz clic en **Más información → Ejecutar de todas formas**. |
+| macOS 13+ | `echo-ai-*-mac-arm.dmg` para Apple Silicon (M1 o posterior), `echo-ai-*-mac-intel.dmg` para Intel | Arrastra Echo-AI a Aplicaciones (sin cuenta de administrador, a una carpeta `Applications` dentro de tu carpeta personal). La app aún no está notarizada: la primera vez, haz clic derecho y elige **Abrir**, o permítela en **Ajustes del Sistema → Privacidad y seguridad**. |
+| Ubuntu 24.04+ y derivados | `echo-ai-*-linux.deb` | `sudo apt install ./echo-ai-*-linux.deb` (un `.deb` siempre pide `sudo`; sin él, [instala desde la terminal](#instalar-desde-la-terminal-sin-administrador)) |
+| Cualquier otro Linux | — | [Instala desde la terminal](#instalar-desde-la-terminal-sin-administrador): dos comandos, sin administrador. |
 
 **Requisitos:** 8 GB de RAM (16 GB para la IA más grande), unos 3 GB libres en disco y, si quieres, una tarjeta gráfica
 NVIDIA con su driver para transcribir mucho más rápido. Todo funciona también en la CPU, solo que más lento.
+
+## Instalar desde la terminal (sin administrador)
+
+Para quien prefiere la línea de comandos o no puede ejecutar un instalador. Todo va a tu carpeta de usuario: sin
+contraseña de administrador, sin el Python del sistema y sin git. [uv](https://docs.astral.sh/uv/) descarga Python 3.12
+solo para Echo-AI.
+
+**macOS y Linux**
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv tool install https://github.com/mowbrazilitteam/Echo-AI-Audio-Transcriber/archive/refs/tags/v1.0.0.zip
+echo-ai
+```
+
+**Windows** (PowerShell)
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+uv tool install https://github.com/mowbrazilitteam/Echo-AI-Audio-Transcriber/archive/refs/tags/v1.0.0.zip
+echo-ai
+```
+
+- Si no se encuentra `uv` o `echo-ai`, abre una terminal nueva (el instalador de uv agrega `~/.local/bin` al `PATH`) o
+  ejecuta `uv tool update-shell`.
+- Los instaladores traen el modelo Small de Whisper incluido; aquí se descarga la primera vez. La primera vez que envíes
+  un audio, Echo-AI abre la lista de modelos: elige **Small** (unos 480 MB) u otro.
+- `echo-ai --navegador` abre la interfaz en tu navegador en lugar de la ventana de la app. En un Linux mínimo, sin las
+  bibliotecas que usa la ventana, Echo-AI se abre solo en el navegador.
+- Con git instalado, `uv tool install git+https://github.com/mowbrazilitteam/Echo-AI-Audio-Transcriber.git` instala el código más reciente de `main` en lugar de una versión publicada.
 
 ## Cómo funciona
 
@@ -101,6 +131,35 @@ La carpeta guarda los audios, la base SQLite con las transcripciones y los chats
 instala) el motor de IA y el paquete de aceleración de NVIDIA. Los modelos de Whisper van a la caché de Hugging Face
 (`~/.cache/huggingface`). Eliminar un chat en la app elimina también su audio.
 
+**Qué usa internet.** Solo las descargas que pides: modelos de Whisper (Hugging Face), modelos de IA (la biblioteca
+de Ollama), el motor de IA (las versiones de Ollama en GitHub) y el paquete de NVIDIA (PyPI). Tus audios,
+transcripciones y chats nunca salen de tu equipo. No hay cuentas ni telemetría.
+
+## Actualizar y desinstalar
+
+| Instalado con | Actualizar | Desinstalar |
+|---|---|---|
+| Instalador de Windows | Ejecuta el `.msi` de la [última versión](https://github.com/mowbrazilitteam/Echo-AI-Audio-Transcriber/releases/latest) | **Configuración → Aplicaciones**, Echo-AI, **Desinstalar** |
+| `.dmg` de macOS | Arrastra la versión nueva encima de la anterior | Arrastra Echo-AI de Aplicaciones a la Papelera |
+| `.deb` de Ubuntu | `sudo apt install ./echo-ai-*-linux.deb` con el archivo nuevo | `sudo apt remove echo-ai` |
+| Terminal (uv) | `uv tool install --reinstall` con el `.zip` de la versión nueva | `uv tool uninstall echo-ai-audio-transcriber` |
+
+Desinstalar conserva tus transcripciones y chats. Para borrar todo, elimina también la [carpeta de datos](#tus-datos)
+y, si quieres, los modelos de Whisper en `~/.cache/huggingface`.
+
+## Problemas comunes
+
+- **La ventana no se abre.** Entonces Echo-AI se abre en tu navegador predeterminado; también puedes abrir
+  http://127.0.0.1:8765 mientras funciona. El motivo queda en el registro (abajo).
+- **Pide instalar una IA, pero ya uso Ollama.** Abre Ollama (la app en Windows y macOS, `ollama serve` en Linux) y
+  vuelve a preguntar. Echo-AI lo busca en `http://127.0.0.1:11434`; para otra dirección, define `ECHO_OLLAMA_URL`.
+- **La transcripción es lenta.** Sin tarjeta NVIDIA funciona en la CPU: elige un modelo más pequeño (Base o Small). Con
+  tarjeta NVIDIA, acepta el paquete de aceleración cuando Echo-AI lo ofrezca.
+- **"Puerto en uso".** Otro programa está usando el puerto 8765: define la variable de entorno `ECHO_PORTA` con otro
+  puerto.
+- **El registro.** `echo.log`, en la [carpeta de datos](#tus-datos), guarda lo que hizo la app y cada error con su
+  motivo. Revisa su contenido antes de adjuntarlo a una issue pública.
+
 ## Ejecutar desde el código
 
 Con [uv](https://docs.astral.sh/uv/) (instala Python 3.12 por ti):
@@ -112,12 +171,7 @@ uv sync                 # agrega --extra gpu en un equipo con tarjeta NVIDIA
 uv run echo-ai          # la app, en su propia ventana
 ```
 
-O instálalo como comando en cualquier Linux, macOS o Windows:
-
-```bash
-uv tool install git+https://github.com/mowbrazilitteam/Echo-AI-Audio-Transcriber.git
-echo-ai
-```
+Para instalarlo como comando, consulta [Instalar desde la terminal](#instalar-desde-la-terminal-sin-administrador).
 
 `echo-ai --navegador` abre la interfaz en tu navegador predeterminado en lugar de la ventana.
 `python -m echo_ai.servidor` ejecuta solo el servidor local. Los ajustes se pueden cambiar con variables de entorno con
