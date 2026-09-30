@@ -54,7 +54,7 @@ jobs:
         run: |
           versao="${GITHUB_REF_NAME//\//-}"   # rodado à mão numa branch feat/x, a barra viraria pasta
           for f in dist/*.msi dist/*.dmg dist/*.deb; do [ -e "$f" ] && mv "$f" "dist/echo-ai-${versao}-${{ matrix.sistema }}.${f##*.}"; done; ls dist
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: echo-ai-${{ matrix.sistema }}
           path: ${{ matrix.arquivo }}
