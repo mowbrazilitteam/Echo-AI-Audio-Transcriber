@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en" class="escuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>Echo-AI</title>
+<link rel="icon" href="/static/icone.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<div class="app">
+  <aside class="lateral" id="lateral">
+    <div class="lateral-topo">
+      <div class="marca"><img src="/static/icone.svg" alt="" width="26" height="26"><span>Echo-AI</span></div>
+      <button class="icone-bt so-celular" id="fechar-lateral" type="button" data-t-aria="fechar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <button class="nova" id="nova" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span data-t="nova"></span>
+    </button>
+    <label class="busca">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14zM20 20l-4-4"/></svg>
+      <input id="busca" type="search" data-t-placeholder="buscar" data-t-title="buscar.dica" autocomplete="off"><kbd>Ctrl K</kbd>
+    </label>
+    <nav class="lista" id="lista" data-t-aria="buscar"></nav>
+    <div class="lateral-base">
+      <button class="linha-bt" id="abrir-ajustes" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        <span data-t="ajustes"></span>
+      </button>
+      <button class="linha-bt" id="abrir-sobre" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5M12 8h.01"/></svg>
+        <span data-t="sobre"></span>
+      </button>
+      <button class="linha-bt" id="tema" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 13a9 9 0 1 1-10-10 7 7 0 0 0 10 10z"/></svg>
+        <span id="tema-rotulo"></span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="principal">
+    <header class="topo">
+      <button class="icone-bt so-celular" id="abrir-lateral" type="button" aria-label="Menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <h1 id="titulo" tabindex="0"></h1>
+      <div class="dispositivo" id="dispositivo" role="status"></div>
+    </header>
+
+    <section class="mensagens" id="mensagens" aria-live="polite"></section>
+
+    <div class="compositor" id="compositor">
+      <div class="gravando oculto" id="gravando" role="status">
+        <span class="ponto-vivo"></span><b data-t="gravando"></b><span id="tempo-gravando">0:00</span>
+        <canvas id="onda-viva" width="600" height="32" aria-hidden="true"></canvas>
+        <button class="bt" id="descartar-gravacao" type="button" data-t="descartar"></button>
+        <button class="bt forte" id="parar-gravacao" type="button" data-t="parar"></button>
+      </div>
+      <div class="envio oculto" id="envio" role="status"><span id="texto-envio"></span><div class="barra"><i id="barra-envio"></i></div></div>
+      <div class="caixa">
+        <textarea id="pergunta" rows="1"></textarea>
+        <div class="caixa-linha">
+          <button class="icone-bt" id="anexar" type="button" data-t-aria="anexar" data-t-title="anexar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <div class="escolhas">
+            <button class="escolha" id="escolher-whisper" type="button" aria-haspopup="dialog"></button>
+            <button class="escolha" id="escolher-idioma" type="button" aria-haspopup="listbox"></button>
+            <button class="escolha" id="escolher-ia" type="button" aria-haspopup="dialog"></button>
+            <button class="escolha" id="escolher-escopo" type="button"></button>
+          </div>
+          <button class="icone-bt gravar" id="gravar" type="button" data-t-aria="microfone" data-t-title="microfone">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          </button>
+          <button class="enviar" id="enviar" type="button" data-t-aria="enviar" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+      </div>
+      <input type="file" id="arquivo" multiple hidden>
+    </div>
+  </main>
+</div>
+
+<div class="soltar oculto" id="soltar"><div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M6 10l6 6 6-6M5 20h14"/></svg><b data-t="soltar"></b></div></div>
+
+<div class="painel-modelos oculto" id="painel-modelos" role="dialog" aria-modal="false"></div>
+<div class="menu-idioma oculto" id="menu-idioma" role="listbox"></div>
+
+<dialog class="janela" id="janela-ajustes">
+  <div class="janela-cab"><h2 data-t="ajustes"></h2><button class="icone-bt" id="fechar-ajustes" type="button" data-t-aria="fechar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="janela-corpo" id="corpo-ajustes"></div>
+</dialog>
+
+<dialog class="janela sobre" id="janela-sobre">
+  <div class="janela-cab"><span></span><button class="icone-bt" id="fechar-sobre" type="button" data-t-aria="fechar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="sobre-corpo">
+    <img src="/static/icone.svg" alt="" width="88" height="88">
+    <h2>Echo-AI</h2>
+    <p class="sobre-nome">Echo AI Audio Transcriber</p>
+    <p class="sobre-versao" id="sobre-versao"></p>
+    <div class="credito">
+      <span data-t="sobre.criado"></span>
+      <b>Victor Medeiros</b>
+      <span data-t="sobre.cargo"></span>
+    </div>
+    <p data-t="sobre.privacidade"></p>
+    <p class="apagado" data-t="sobre.licenca"></p>
+    <a class="bt contorno" href="https://github.com/mowbrazilitteam/Echo-AI-Audio-Transcriber" target="_blank" rel="noopener noreferrer" data-t="sobre.codigo"></a>
+  </div>
+</dialog>
+
+<dialog class="janela pequena" id="janela-confirmar">
+  <p id="texto-confirmar"></p>
+  <div class="botoes"><button class="bt" id="confirmar-nao" type="button" data-t="cancelar"></button><button class="bt forte" id="confirmar-sim" type="button"></button></div>
+</dialog>
+
+<div class="aviso oculto" id="aviso" role="status"></div>
+<script src="/static/i18n.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+# Os instaladores de cada sistema, gerados quando uma versão é publicada (tag v1.2.3), e anexados à Release.
+#   Windows: .msi       macOS: .dmg (Apple Silicon e Intel)       Linux: .deb (Ubuntu 24.04+ e derivados)
+# Outras distribuições Linux: uv tool install (README). O AppImage do Briefcase não aceita wheels pré-compilados.
+# O whisper "small" vai dentro do instalador (scripts/incluir_modelo.py): a primeira transcrição não precisa de internet.
+# Sem certificado pago, o Windows (SmartScreen) e o macOS (Gatekeeper) avisam na primeira abertura; o README explica.
+# Os builds só leem o repositório; só o job "release", no fim, escreve (anexa os arquivos).
+name: instaladores
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  instalador:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { sistema: windows, runner: windows-2022, alvo: "windows", arquivo: "dist/*.msi" }
+          - { sistema: mac-arm, runner: macos-15, alvo: "macOS", arquivo: "dist/*.dmg" }
+          - { sistema: mac-intel, runner: macos-15-intel, alvo: "macOS", arquivo: "dist/*.dmg" }
+          - { sistema: linux, runner: ubuntu-24.04, alvo: "linux system", arquivo: "dist/*.deb" }   # o Python do sistema é o 3.12
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - run: uv sync --locked
+      - name: Incluir o whisper small no instalador
+        run: uv run python scripts/incluir_modelo.py small
+      - name: Bibliotecas do sistema para montar o .deb
+        if: matrix.sistema == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends build-essential libegl1 libgl1 libxkbcommon0
+      - run: uv run briefcase create ${{ matrix.alvo }} --no-input
+      - run: uv run briefcase build ${{ matrix.alvo }} --no-input
+      - run: uv run briefcase package ${{ matrix.alvo }} --no-input --adhoc-sign
+      - name: Nome com o sistema (os dois Macs gerariam o mesmo Echo-AI-<versão>.dmg)
+        shell: bash
+        run: |
+          versao="${GITHUB_REF_NAME//\//-}"   # rodado à mão numa branch feat/x, a barra viraria pasta
+          for f in dist/*.msi dist/*.dmg dist/*.deb; do [ -e "$f" ] && mv "$f" "dist/echo-ai-${versao}-${{ matrix.sistema }}.${f##*.}"; done; ls dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: echo-ai-${{ matrix.sistema }}
+          path: ${{ matrix.arquivo }}
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: instalador
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write   # só aqui: criar a Release e anexar os instaladores
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          path: instaladores
+          merge-multiple: true
+      - name: Conferir que chegaram os 4 instaladores
+        run: test "$(ls instaladores | wc -l)" -eq 4 || { ls instaladores; exit 1; }
+      - name: Criar a Release (ou atualizar, ao rodar de novo) com os instaladores
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1 || \
+            gh release create "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --title "Echo-AI ${GITHUB_REF_NAME}" --notes-file CHANGELOG.md
+          gh release upload "${GITHUB_REF_NAME}" instaladores/* --repo "${GITHUB_REPOSITORY}" --clobber

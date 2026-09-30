@@ -1,0 +1,146 @@
+[project]
+name = "echo-ai-audio-transcriber"
+version = "1.0.0"
+description = "Local, private audio transcription with an AI assistant. Runs on Windows, macOS and Linux, on the GPU or the CPU."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Victor Medeiros" }]
+requires-python = ">=3.12"
+dependencies = [
+    "av>=14,<16",
+    "fastapi>=0.142.0",
+    "faster-whisper>=1.2.1",
+    "httpx>=0.28.1",
+    "jinja2>=3.1.6",
+    "psutil>=6",
+    "pydantic-settings>=2.15.0",
+    "python-multipart>=0.0.32",
+    "pywebview>=5.3 ; sys_platform != 'linux'",
+    "pywebview[pyside6]>=5.3 ; sys_platform == 'linux'",  # PySide6 é LGPL (o PyQt6 é GPL, não combina com MIT)
+    "uvicorn>=0.30",
+    "zstandard>=0.23",
+]
+
+[project.optional-dependencies]
+# a aceleração da placa NVIDIA para quem roda do código-fonte (uv sync --extra gpu). O app instalado não traz estes
+# 2 GB: baixa o mesmo pacote pela tela, quando acha uma placa NVIDIA (echo_ai/aceleracao.py).
+gpu = [
+    "nvidia-cublas-cu12==12.9.2.10; sys_platform != 'darwin'",
+    "nvidia-cudnn-cu12==9.26.0.51; sys_platform != 'darwin'",
+    "nvidia-cuda-nvrtc-cu12==12.9.86; sys_platform != 'darwin'",
+]
+
+[project.scripts]
+echo-ai = "echo_ai.janela:main"
+
+[dependency-groups]
+dev = [
+    "briefcase>=0.3.24",
+    "mypy>=2.3.1",
+    "pytest>=9.1.1",
+    "ruff>=0.16.9",
+]
+
+[tool.ruff]
+line-length = 130
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S"]
+ignore = ["S101", "S603"]      # assert nos testes; subprocess da Piper com argumentos fixos (sem shell)
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_ignores = true
+check_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["echo_ai"]
+
+# ── os instaladores (Briefcase): MSI no Windows, DMG no macOS, .deb no Linux ──────────────
+# O GitHub Actions gera os três (.github/workflows/instaladores.yml). A lista `requires` é a mesma de
+# [project].dependencies, sem a aceleração da NVIDIA (o app baixa pela tela quando acha a placa).
+[tool.briefcase]
+project_name = "Echo AI Audio Transcriber"
+bundle = "com.github.mowbrazilitteam"
+version = "1.0.0"
+url = "https://github.com/mowbrazilitteam/Echo-AI-Audio-Transcriber"
+license = "MIT"
+license-files = ["LICENSE"]
+author = "Victor Medeiros"
+author_email = "318295254+mowbrazilitteam@users.noreply.github.com"
+
+[tool.briefcase.app.echo-ai]
+formal_name = "Echo-AI"
+description = "Local, private audio transcription with an AI assistant."
+long_description = """Transcribe any audio or video on your own computer with Whisper, then ask a local AI about what \
+was said. Nothing leaves your computer."""
+icon = "icones/echo-ai"
+sources = ["echo_ai"]
+test_sources = ["tests"]
+requires = [
+    "av>=14,<16",
+    "fastapi>=0.142.0",
+    "faster-whisper>=1.2.1",
+    "httpx>=0.28.1",
+    "jinja2>=3.1.6",
+    "psutil>=6",
+    "pydantic-settings>=2.15.0",
+    "python-multipart>=0.0.32",
+    "uvicorn>=0.30",
+    "zstandard>=0.23",
+]
+permission.microphone = "Echo-AI records audio from the microphone to transcribe it on this computer."
+
+[tool.briefcase.app.echo-ai.macOS]
+requires = ["pywebview>=5.3"]
+universal_build = false
+
+[tool.briefcase.app.echo-ai.windows]
+requires = ["pywebview>=5.3"]
+
+[tool.briefcase.app.echo-ai.linux]
+requires = ["pywebview[pyside6]>=5.3"]
+
+[tool.briefcase.app.echo-ai.linux.system.debian]
+system_requires = []
+# o que o Qt WebEngine (a janela) carrega e um Ubuntu 24.04 limpo não tem: medido com ldd no container ubuntu:24.04
+system_runtime_requires = [
+    "libegl1",
+    "libgl1",
+    "libxkbcommon0",
+    "libxkbcommon-x11-0",
+    "libfontconfig1",
+    "libdbus-1-3",
+    "libnss3",
+    "libasound2t64",
+    "libglib2.0-0t64",
+    "libgssapi-krb5-2",
+    "libxcomposite1",
+    "libxdamage1",
+    "libxfixes3",
+    "libxrandr2",
+    "libxtst6",
+    "libxkbfile1",
+    "libxcb-cursor0",
+    "libxcb-icccm4",
+    "libxcb-keysyms1",
+    "libxcb-shape0",
+    "libxcb-xkb1",
+    "libwayland-cursor0",
+    "libwayland-egl1",
+    "libwayland-server0",
+]

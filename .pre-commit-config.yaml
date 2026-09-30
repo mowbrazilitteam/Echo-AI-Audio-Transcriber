@@ -1,0 +1,17 @@
+# pre-commit install  (roda antes de cada commit: Ruff, gitleaks e Bandit)
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.9
+    hooks:
+      - id: ruff
+      - id: ruff-format
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.28.0
+    hooks:
+      - id: gitleaks
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.9.4
+    hooks:
+      - id: bandit
+        args: ["-q", "-s", "B101,B404,B603"]
+        files: ^echo_ai/
